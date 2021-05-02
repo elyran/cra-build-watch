@@ -30,7 +30,7 @@ const { major, concatenatedVersion } = getReactScriptsVersion(reactScriptsVersio
 const paths = isEjected ? importCwd('./config/paths') : importCwd('react-scripts/config/paths');
 const webpack = importCwd('webpack');
 
-const config =
+let config =
   concatenatedVersion >= 212
     ? (isEjected
         ? importCwd('./config/webpack.config')
@@ -127,6 +127,12 @@ config.plugins[htmlPluginIndex] = new HtmlWebpackPlugin({
   template: paths.appHtml,
   filename: 'index.html',
 });
+
+const configOverridesPath = path.resolve(fs.realpathSync(process.cwd()), 'config-overrides.cra-build-watch.js')
+if (fs.existsSync(configOverridesPath)) {
+  const configOverrides = require(configOverridesPath)
+  config = configOverrides(config)
+}
 
 spinner.succeed();
 spinner.start('Clear destination folder');
